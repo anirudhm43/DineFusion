@@ -1,0 +1,183 @@
+---
+title: DineFusion – Relational Schema (20 tables)
+config:
+  layout: elk
+  theme: neutral
+---
+erDiagram
+    RESTAURANT {
+        INT restaurant_id PK
+        VARCHAR restaurant_name
+        VARCHAR contact_number
+        VARCHAR email
+    }
+    BRANCH {
+        INT branch_id PK
+        INT restaurant_id FK
+        VARCHAR branch_name
+        VARCHAR address
+        VARCHAR city
+        VARCHAR phone
+    }
+    EMPLOYEE {
+        INT employee_id PK
+        INT branch_id FK
+        VARCHAR name
+        VARCHAR email
+        VARCHAR phone
+        VARCHAR role
+        VARCHAR password_hash
+    }
+    DINING_TABLE {
+        INT table_id PK
+        INT branch_id FK "UNIQUE(branch_id, table_number)"
+        INT table_number "UNIQUE(branch_id, table_number)"
+        INT capacity
+        VARCHAR table_status
+    }
+    CUSTOMER {
+        INT customer_id PK
+        VARCHAR name
+        VARCHAR email
+        VARCHAR phone
+        VARCHAR password_hash
+        DATETIME created_at
+    }
+    RESERVATION {
+        INT reservation_id PK
+        INT customer_id FK
+        INT table_id FK
+        DATE reservation_date
+        TIME reservation_time
+        INT party_size
+        VARCHAR status
+        DATETIME created_at
+    }
+    DINING_SESSION {
+        INT session_id PK
+        INT customer_id FK "nullable"
+        INT table_id FK
+        INT reservation_id FK, UK "nullable"
+        VARCHAR session_type
+        DATETIME check_in_time
+        DATETIME check_out_time
+        VARCHAR status
+    }
+    RESTAURANT_ORDER {
+        INT order_id PK
+        INT branch_id FK
+        INT customer_id FK "nullable"
+        INT session_id FK "nullable"
+        VARCHAR order_type
+        VARCHAR order_status
+        DATETIME order_date
+        DECIMAL subtotal
+        DECIMAL tax
+        DECIMAL discount
+        DECIMAL total_amount
+    }
+    ORDER_ITEM {
+        INT order_item_id PK
+        INT order_id FK
+        INT item_id FK
+        INT quantity
+        DECIMAL unit_price
+        DECIMAL subtotal
+    }
+    PAYMENT {
+        INT payment_id PK
+        INT order_id FK, UK
+        VARCHAR payment_method
+        VARCHAR payment_status
+        DECIMAL amount
+        DATETIME payment_date
+        VARCHAR transaction_reference
+    }
+    MENU_CATEGORY {
+        INT category_id PK
+        VARCHAR category_name
+        VARCHAR description
+    }
+    MENU_ITEM {
+        INT item_id PK
+        INT category_id FK
+        VARCHAR item_name
+        VARCHAR description
+        DECIMAL price
+        INT preparation_time
+        BOOLEAN is_vegetarian
+        VARCHAR availability_status
+    }
+    CUISINE {
+        INT cuisine_id PK
+        VARCHAR cuisine_name
+        VARCHAR description
+    }
+    INGREDIENT {
+        INT ingredient_id PK
+        VARCHAR ingredient_name
+        VARCHAR unit
+        DECIMAL reorder_level
+    }
+    SUPPLIER {
+        INT supplier_id PK
+        VARCHAR supplier_name
+        VARCHAR phone
+        VARCHAR email
+        VARCHAR address
+    }
+    INVENTORY {
+        INT inventory_id PK
+        INT branch_id FK "UNIQUE(branch_id, ingredient_id)"
+        INT ingredient_id FK "UNIQUE(branch_id, ingredient_id)"
+        DECIMAL quantity_available
+        DATETIME last_updated
+    }
+    REVIEW {
+        INT review_id PK
+        INT customer_id FK
+        INT item_id FK
+        INT rating
+        DATETIME created_at
+    }
+    MENU_ITEM_CUISINE {
+        INT item_id PK, FK
+        INT cuisine_id PK, FK
+    }
+    MENU_ITEM_INGREDIENT {
+        INT item_id PK, FK
+        INT ingredient_id PK, FK
+        DECIMAL quantity_required
+    }
+    SUPPLIER_INGREDIENT {
+        INT supplier_id PK, FK
+        INT ingredient_id PK, FK
+        DECIMAL unit_price
+        INT lead_time_days
+    }
+
+    BRANCH ||--o{ DINING_TABLE : contains
+    BRANCH ||--o{ EMPLOYEE : employs
+    BRANCH ||--o{ INVENTORY : maintains
+    BRANCH ||--o{ RESTAURANT_ORDER : receives
+    CUISINE ||--o{ MENU_ITEM_CUISINE : belongs_to
+    CUSTOMER |o--o{ DINING_SESSION : has
+    CUSTOMER ||--o{ RESERVATION : makes
+    CUSTOMER |o--o{ RESTAURANT_ORDER : places
+    CUSTOMER ||--o{ REVIEW : writes
+    DINING_SESSION |o--o{ RESTAURANT_ORDER : generates
+    DINING_TABLE ||--o{ DINING_SESSION : assigned_to
+    DINING_TABLE ||--o{ RESERVATION : reserved_for
+    INGREDIENT ||--o{ INVENTORY : stocks
+    INGREDIENT ||--o{ MENU_ITEM_INGREDIENT : requires
+    INGREDIENT ||--o{ SUPPLIER_INGREDIENT : supplies
+    MENU_CATEGORY ||--o{ MENU_ITEM : contains
+    MENU_ITEM ||--o{ MENU_ITEM_CUISINE : belongs_to
+    MENU_ITEM ||--o{ MENU_ITEM_INGREDIENT : requires
+    MENU_ITEM ||--o{ ORDER_ITEM : refers_to
+    MENU_ITEM ||--o{ REVIEW : reviews
+    RESERVATION |o--o| DINING_SESSION : creates
+    RESTAURANT ||--o{ BRANCH : has
+    RESTAURANT_ORDER ||--|{ ORDER_ITEM : contains
+    RESTAURANT_ORDER ||--o| PAYMENT : paid_by
+    SUPPLIER ||--o{ SUPPLIER_INGREDIENT : supplies

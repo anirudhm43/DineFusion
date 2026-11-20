@@ -416,6 +416,8 @@ To get the latest updates:
 git pull origin main
 ```
 
+The Frontend was later made from Next.js
+
 Each contributor must execute the SQL scripts locally to recreate their own MySQL database. GitHub stores the project files, not the live contents of a local MySQL database.
 
 For team collaboration, contributors should preferably work on separate branches and merge their changes into the main branch after review.
